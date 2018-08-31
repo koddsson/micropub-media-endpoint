@@ -45,7 +45,9 @@ app.post('/upload', async function(request, response) {
     return response.status(401).send('Unauthorized')
   }
 
+  console.log(request)
   upload(request, response, function(error, filename) {
+    console.log(request)
     if (error) {
       console.log(error)
       return response.status(400).send('Not found')
