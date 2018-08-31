@@ -6,6 +6,7 @@ const multer = require('multer')
 const multerS3 = require('multer-s3')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
+const fetch = require('node-fetch')
 
 const app = express()
 app.use(morgan('combined'))

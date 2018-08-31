@@ -17,7 +17,8 @@
     "express": "^4.16.3",
     "morgan": "^1.9.0",
     "multer": "^1.3.1",
-    "multer-s3": "^2.7.0"
+    "multer-s3": "^2.7.0",
+    "node-fetch": "^2.2.0"
   },
   "devDependencies": {
     "eslint": "^5.4.0",
