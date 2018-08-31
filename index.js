@@ -28,7 +28,7 @@ const upload = multer({
       cb(null, file.originalname)
     }
   })
-}).array('upload', 1)
+}).array('file', 1)
 
 const port = process.env.PORT || 3000
 
