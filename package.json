@@ -13,7 +13,9 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.306.0",
+    "body-parser": "^1.18.3",
     "express": "^4.16.3",
+    "morgan": "^1.9.0",
     "multer": "^1.3.1",
     "multer-s3": "^2.7.0"
   },
