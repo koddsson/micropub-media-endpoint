@@ -48,10 +48,10 @@ app.post('/upload', async function(request, response) {
   upload(request, response, function(error, filename) {
     if (error) {
       console.log(error)
-      return response.status(400)
+      return response.status(400).send('Not found')
     }
     response.header('Location', `https://koddsson-media.ams3.digitaloceanspaces.com/${filename}`)
-    response.status(201)
+    return response.status(201).send('Created')
   })
 })
 
