@@ -23,6 +23,7 @@ const upload = multer({
     s3,
     bucket: 'koddsson-media',
     acl: 'public-read',
+    contentType: multerS3.AUTO_CONTENT_TYPE,
     key(request, file, cb) {
       console.log(file)
       cb(null, file.originalname)
