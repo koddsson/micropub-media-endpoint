@@ -7,6 +7,7 @@ const multerS3 = require('multer-s3')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
 const fetch = require('node-fetch')
+const ExifTransformer = require('exif-be-gone')
 
 const app = express()
 app.use(morgan('combined'))
@@ -23,7 +24,11 @@ const upload = multer({
     s3,
     bucket: 'koddsson-media',
     acl: 'public-read',
-    contentType: multerS3.AUTO_CONTENT_TYPE,
+    contentType(req, file, cb) {
+      multerS3.AUTO_CONTENT_TYPE(req, file, function(_, mime, outputStream) {
+        cb(null, mime, outputStream.pipe(new ExifTransformer({readableObjectMode: true, writableObjectMode: true})))
+      })
+    },
     key(request, file, cb) {
       console.log(file)
       cb(null, file.originalname)
