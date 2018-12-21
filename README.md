@@ -4,6 +4,5 @@ A simple app that implements the [Micropub Media Endpoint W3 Recommendation](htt
 
 ### TODO
 
-- Abstract hardcoded values into enviromental variables.
 - Add tests.
 - Write how to use section in README.

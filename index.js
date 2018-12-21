@@ -14,17 +14,18 @@ app.use(morgan('combined'))
 app.use(bodyParser.urlencoded({extended: true, limit: '100mb'}))
 app.use(bodyParser.json())
 
-const spacesEndpoint = new aws.Endpoint('ams3.digitaloceanspaces.com')
 const s3 = new aws.S3({
-  endpoint: spacesEndpoint
+  endpoint: new aws.Endpoint(process.env.S3_ENDPOINT)
 })
 
 const upload = multer({
   storage: multerS3({
     s3,
-    bucket: 'koddsson-media',
+    bucket: process.env.S3_BUCKET,
     acl: 'public-read',
     contentType(req, file, cb) {
+      // A hack that pipes the output stream through the exif transformer before after we detect the content type
+      // of the stream but before we send it to S3
       multerS3.AUTO_CONTENT_TYPE(req, file, function(_, mime, outputStream) {
         cb(null, mime, outputStream.pipe(new ExifTransformer({readableObjectMode: true, writableObjectMode: true})))
       })
@@ -39,7 +40,7 @@ const upload = multer({
 const port = process.env.PORT || 3000
 
 app.post('/upload', async function(request, response) {
-  const authResponse = await fetch('https://tokens.indieauth.com/token', {
+  const authResponse = await fetch(process.env.AUTH_PROVIDER, {
     headers: {
       Accept: 'application/json',
       Authorization: request.header('Authorization')
@@ -47,7 +48,7 @@ app.post('/upload', async function(request, response) {
   })
 
   const json = await authResponse.json()
-  if (json.me !== 'https://koddsson.com/') {
+  if (json.me !== process.env.HOMEPAGE) {
     return response.status(401).send('Unauthorized')
   }
 
@@ -57,7 +58,7 @@ app.post('/upload', async function(request, response) {
       return response.status(400).send('Not found')
     }
     const filename = request.files[0].originalname
-    response.header('Location', `https://koddsson-media.ams3.digitaloceanspaces.com/${filename}`)
+    response.header('Location', `https://${process.env.S3_BUCKET}.${process.env.S3_ENDPOINT}/${filename}`)
     return response.status(201).send('Created')
   })
 })
