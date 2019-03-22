@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const aws = require('aws-sdk')
 const express = require('express')
 const multer = require('multer')
@@ -31,6 +29,7 @@ const upload = multer({
       })
     },
     key(request, file, cb) {
+      // eslint-disable-next-line no-console
       console.log(file)
       cb(null, file.originalname)
     }
@@ -52,6 +51,7 @@ app.post('/upload', async function(request, response) {
 
   upload(request, response, function(error) {
     if (error) {
+      // eslint-disable-next-line no-console
       console.log(error)
       return response.status(400).send('Not found')
     }
