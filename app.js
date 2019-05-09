@@ -28,6 +28,7 @@ const upload = multer({
         cb(null, mime, outputStream.pipe(new ExifTransformer({readableObjectMode: true, writableObjectMode: true})))
       })
     },
+    cacheControl: 'max-age=31536000',
     key(request, file, cb) {
       // eslint-disable-next-line no-console
       console.log(file)
