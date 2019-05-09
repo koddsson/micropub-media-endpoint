@@ -31,7 +31,7 @@ function uploadImage(filename, file) {
         Body: file,
         CacheControl: 'max-age=31536000',
         ContentDisposition: 'inline',
-        ContentType: `image/${filename.split('.')[1]}`
+        ContentType: `image/${path.extname(filename).replace('.', '')}`
       },
       (err, data) => {
         if (err) {
