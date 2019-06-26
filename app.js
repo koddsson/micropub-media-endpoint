@@ -1,43 +1,51 @@
+const path = require('path')
 const aws = require('aws-sdk')
 const express = require('express')
-const multer = require('multer')
-const multerS3 = require('multer-s3')
 const morgan = require('morgan')
-const bodyParser = require('body-parser')
 const fetch = require('node-fetch')
-const ExifTransformer = require('exif-be-gone')
+const imagemin = require('imagemin')
+const fileParser = require('express-multipart-file-parser')
+const imageminJpegtran = require('imagemin-jpegtran')
+const imageminPngquant = require('imagemin-pngquant')
+
+require('dotenv').config()
+
 const app = express()
 
 app.use(morgan('combined'))
-app.use(bodyParser.urlencoded({extended: true, limit: '100mb'}))
-app.use(bodyParser.json())
+app.use(fileParser)
 
 const s3 = new aws.S3({
   endpoint: new aws.Endpoint(process.env.S3_ENDPOINT)
 })
 
-const upload = multer({
-  storage: multerS3({
-    s3,
-    bucket: process.env.S3_BUCKET,
-    acl: 'public-read',
-    contentType(req, file, cb) {
-      // A hack that pipes the output stream through the exif transformer before after we detect the content type
-      // of the stream but before we send it to S3
-      multerS3.AUTO_CONTENT_TYPE(req, file, function(_, mime, outputStream) {
-        cb(null, mime, outputStream.pipe(new ExifTransformer({readableObjectMode: true, writableObjectMode: true})))
-      })
-    },
-    cacheControl: 'max-age=31536000',
-    key(request, file, cb) {
-      // eslint-disable-next-line no-console
-      console.log(file)
-      cb(null, file.originalname)
-    }
+const supportedFiles = ['.png', '.jpg', '.jpeg']
+
+function uploadImage(filename, file) {
+  return new Promise((resolve, reject) => {
+    s3.putObject(
+      {
+        Bucket: process.env.S3_BUCKET,
+        ACL: 'public-read',
+        Key: filename,
+        Body: file,
+        CacheControl: 'max-age=31536000',
+        ContentDisposition: 'inline',
+        ContentType: `image/${path.extname(filename).replace('.', '')}`
+      },
+      (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      }
+    )
   })
-}).array('file', 1)
+}
 
 app.post('/upload', async function(request, response) {
+  // TODO: Change this to a middleware
   const authResponse = await fetch(process.env.AUTH_PROVIDER, {
     headers: {
       Accept: 'application/json',
@@ -50,16 +58,34 @@ app.post('/upload', async function(request, response) {
     return response.status(401).send('Unauthorized')
   }
 
-  upload(request, response, function(error) {
-    if (error) {
-      // eslint-disable-next-line no-console
-      console.log(error)
-      return response.status(400).send('Not found')
-    }
-    const filename = request.files[0].originalname
-    response.header('Location', `https://${process.env.S3_BUCKET}.${process.env.S3_ENDPOINT}/${filename}`)
-    return response.status(201).send('Created')
+  if (request.files.length > 1) {
+    return response.status(400).send('I currently only support one image at a time')
+  }
+
+  const filename = request.files[0].originalname
+  const extension = path.extname(filename)
+
+  if (!supportedFiles.includes(extension)) {
+    return response.status(400).send(`I currently only support files with the extensions: ${supportedFiles.join(',')}.`)
+  }
+
+  const compressedImage = await imagemin.buffer(request.files[0].buffer, {
+    plugins: [
+      imageminJpegtran(),
+      imageminPngquant({
+        quality: [0.6, 0.8]
+      })
+    ]
   })
+
+  try {
+    await uploadImage(filename, compressedImage)
+  } catch (error) {
+    return response.status(500).send(error.toString())
+  }
+
+  response.header('Location', `https://${process.env.S3_BUCKET}.${process.env.S3_ENDPOINT}/${filename}`)
+  return response.status(201).send('Created')
 })
 
 module.exports = app
