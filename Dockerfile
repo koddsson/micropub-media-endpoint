@@ -1,5 +1,12 @@
 FROM node:8-alpine
 
+RUN apk update \
+    && apk add --virtual build-dependencies \
+        build-base \
+        gcc \
+        nasm \
+        autoconf
+
 # Create app directory
 WORKDIR /usr/src/app
 
