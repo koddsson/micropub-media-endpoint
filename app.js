@@ -44,6 +44,20 @@ function uploadImage(filename, file) {
   })
 }
 
+// Instead of redirecting to the S3 bucket, we'll have a endpoint where you can
+// access the images directly from the server.
+app.get('/i/:id', async function(request, response) {
+  s3.getObject({Bucket: process.env.S3_BUCKET, Key: request.params.id}, function(err, data) {
+    if (err) {
+      response.status(404).send('Not found')
+      return
+    }
+    response.set('Content-Length', data.ContentLength)
+    response.set('Content-Type', data.ContentType)
+    response.send(data.Body)
+  })
+})
+
 app.post('/upload', async function(request, response) {
   // TODO: Change this to a middleware
   const authResponse = await fetch(process.env.AUTH_PROVIDER, {
@@ -84,7 +98,7 @@ app.post('/upload', async function(request, response) {
     return response.status(500).send(error.toString())
   }
 
-  response.header('Location', `https://${process.env.S3_BUCKET}.${process.env.S3_ENDPOINT}/${filename}`)
+  response.header('Location', `/i/${filename}`)
   return response.status(201).send('Created')
 })
 
