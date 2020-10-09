@@ -59,6 +59,9 @@ app.get('/i/:id', async function(request, response) {
 })
 
 app.post('/upload', async function(request, response) {
+  // eslint-disable-next-line no-console
+  console.log('Getting upload')
+
   // TODO: Change this to a middleware
   const authResponse = await fetch(process.env.AUTH_PROVIDER, {
     headers: {
