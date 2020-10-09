@@ -71,7 +71,7 @@ app.post('/upload', async function(request, response) {
   })
 
   const json = await authResponse.json()
-  if (json.me !== process.env.HOMEPAGE) {
+  if (json.me !== `${process.env.BASE_URL}/`) {
     // eslint-disable-next-line no-console
     console.log('Unauthorized')
     return response.status(401).send('Unauthorized')
@@ -109,7 +109,7 @@ app.post('/upload', async function(request, response) {
     return response.status(500).send(error.toString())
   }
 
-  response.header('Location', `/i/${filename}`)
+  response.header('Location', `${process.env.BASE_URL}/i/${filename}`)
   return response.status(201).send('Created')
 })
 
