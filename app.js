@@ -69,10 +69,14 @@ app.post('/upload', async function(request, response) {
 
   const json = await authResponse.json()
   if (json.me !== process.env.HOMEPAGE) {
+    // eslint-disable-next-line no-console
+    console.log('Unauthorized')
     return response.status(401).send('Unauthorized')
   }
 
   if (request.files.length > 1) {
+    // eslint-disable-next-line no-console
+    console.log('I currently only support one image at a time')
     return response.status(400).send('I currently only support one image at a time')
   }
 
@@ -80,6 +84,8 @@ app.post('/upload', async function(request, response) {
   const extension = path.extname(filename)
 
   if (!supportedFiles.includes(extension)) {
+    // eslint-disable-next-line no-console
+    console.log(`I currently only support files with the extensions: ${supportedFiles.join(',')}.`)
     return response.status(400).send(`I currently only support files with the extensions: ${supportedFiles.join(',')}.`)
   }
 
@@ -95,6 +101,8 @@ app.post('/upload', async function(request, response) {
   try {
     await uploadImage(filename, compressedImage)
   } catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(error.toString())
     return response.status(500).send(error.toString())
   }
 
