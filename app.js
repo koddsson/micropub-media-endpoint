@@ -73,7 +73,7 @@ app.post('/upload', async function(request, response) {
   const json = await authResponse.json()
   if (json.me !== process.env.HOMEPAGE) {
     // eslint-disable-next-line no-console
-    console.log('Unauthorized')
+    console.log(`Unauthorized. Expected ${process.env.HOMEPAGE} but got ${json.me}.`)
     return response.status(401).send('Unauthorized')
   }
 
