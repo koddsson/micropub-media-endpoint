@@ -1,11 +1,6 @@
 FROM node:14
 
-RUN apk update \
-    && apk add --virtual build-dependencies \
-        build-base \
-        gcc \
-        nasm \
-        autoconf
+RUN apt-get update && apt-get install build-essential
 
 # Create app directory
 WORKDIR /usr/src/app
