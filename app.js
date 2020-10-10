@@ -52,6 +52,7 @@ app.get('/i/:id', async function(request, response) {
       response.status(404).send('Not found')
       return
     }
+    response.set('Cache-Control', 'max-age=31536000')
     response.set('Content-Length', data.ContentLength)
     response.set('Content-Type', data.ContentType)
     response.send(data.Body)
