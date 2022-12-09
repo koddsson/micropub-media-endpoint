@@ -14,7 +14,7 @@
   "dependencies": {
     "aws-sdk": "^2.426.0",
     "dotenv": "^8.0.0",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "express-multipart-file-parser": "^0.1.2",
     "imagemin": "^6.1.0",
     "imagemin-jpegtran": "^6.0.0",
